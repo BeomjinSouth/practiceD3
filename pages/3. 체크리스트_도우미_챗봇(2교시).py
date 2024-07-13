@@ -1,12 +1,28 @@
 import streamlit as st
-from openai import OpenAI
+import openai
 
 # 페이지 제목 설정
 st.title("체크리스트 도우미 챗봇")
 
 # OpenAI API 키 설정
-api_key = st.secrets["OPENAI"]["OPENAI_API_KEY"]
-client = OpenAI(api_key=api_key)
+openai.api_key = st.secrets["OPENAI"]["OPENAI_API_KEY"]
+
+def request_chat_completion(
+    prompt,
+    system_role="당신은 교수학습 설계에 능숙한 베테랑 교사입니다. 언급된 AI 디지털교과서의 기능들을 반영하여 해당 교과의 수업 설계안을 작성합니다. 수업 설계안을 작성할 때에는 도입, 전개, 마무리로 구분하여 작성하세요.",
+    model="gpt-4",
+    stream=False
+):
+    messages = [
+        {"role": "system", "content": system_role},
+        {"role": "user", "content": prompt},
+    ]
+    response = openai.ChatCompletion.create(
+        model=model,
+        messages=messages,
+        stream=stream
+    )
+    return response
 
 # 챗봇 설정 메시지
 system_message = '''
@@ -60,13 +76,11 @@ if prompt := st.chat_input("What is up?"):
 
     # OpenAI 모델 호출
     with st.chat_message("assistant"):
-        response = client.ChatCompletion.create(
-            model="gpt-4o",
-            messages=[
-                {"role": m["role"], "content": m["content"]}
-                for m in st.session_state.messages
-            ]
+        response = request_chat_completion(
+            prompt=prompt,
+            system_role=system_message,
+            model="gpt-4o"
         )
-        response_content = response['choices'][0]['message']['content']
+        response_content = response.choices[0].message['content']
         st.markdown(response_content)
         st.session_state.messages.append({"role": "assistant", "content": response_content})
