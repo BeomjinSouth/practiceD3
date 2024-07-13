@@ -80,10 +80,13 @@ if prompt := st.chat_input("What is up?"):
 
     # OpenAI 모델 호출
     with st.chat_message("assistant"):
-        response = request_chat_completion(
-            prompt=prompt,
-            system_role=system_message,
-            model="gpt-4o"
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": m["role"], "content": m["content"]}
+                for m in st.session_state.messages
+            ],
+            stream=False,
         )
         response_content = response.choices[0].message['content']
         st.markdown(response_content)
