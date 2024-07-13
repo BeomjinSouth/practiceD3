@@ -1,9 +1,6 @@
 import streamlit as st
 from openai import OpenAI
 
-# 페이지 제목 설정
-st.title("체크리스트 도우미 챗봇")
-
 # OpenAI API 키 설정
 client = OpenAI(api_key=st.secrets["OPENAI"]["OPENAI_API_KEY"])
 
@@ -17,12 +14,19 @@ def request_chat_completion(
         {"role": "system", "content": system_role},
         {"role": "user", "content": prompt},
     ]
-    response = client.ChatCompletion.create(
+    response = client.chat.completions.create(
         model=model,
         messages=messages,
         stream=stream
     )
     return response
+
+st.set_page_config(
+    page_title="체크리스트 도우미 챗봇",
+    page_icon="✔️"
+)
+
+st.title("체크리스트 도우미 챗봇")
 
 # 챗봇 설정 메시지
 system_message = '''
@@ -35,8 +39,8 @@ system_message = '''
 
 ## 규칙
 1. **제공된 정보를 토대로 수업 설계안을 체크하기 위한 체크리스트를 작성함**:
-3. **곧바로 답변하기에 너무 포괄적인 질문인 경우 추가적인 정보를 요청**
-2. **체크리스트 작성 방식**:
+2. **곧바로 답변하기에 너무 포괄적인 질문인 경우 추가적인 정보를 요청**
+3. **체크리스트 작성 방식**:
     - 각각의 체크리스트는 한 줄로 작성.
     - 체크리스트는 하나만 제시하지 않고, 2개 이상, 3개 이하로 제시할 것
 
