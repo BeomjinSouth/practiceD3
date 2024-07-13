@@ -62,6 +62,8 @@ system_message = '''
 - 예의를 갖추어 대답할 것 
 '''
 
+
+
 # 시스템 메시지 초기화
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "system", "content": system_message}]
@@ -80,14 +82,13 @@ if prompt := st.chat_input("What is up?"):
 
     # OpenAI 모델 호출
     with st.chat_message("assistant"):
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": m["role"], "content": m["content"]}
-                for m in st.session_state.messages
-            ],
-            stream=False,
-        )
-        response_content = response.choices[0].message['content']
-        st.markdown(response_content)
-        st.session_state.messages.append({"role": "assistant", "content": response_content})
+        stream = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": m["role"], "content": m["content"]}
+                    for m in st.session_state.messages
+                ],
+                stream=True,
+            )
+            response = st.write_stream(stream)
+        st.session_state.messages.append({"role": "assistant", "content": response})
