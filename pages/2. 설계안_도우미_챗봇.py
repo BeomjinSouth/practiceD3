@@ -72,9 +72,5 @@ if prompt := st.chat_input("안녕하세요?"):
             ],
             stream=True,
         )
-        response = ""
-        for chunk in stream:
-            chunk_message = chunk['choices'][0].get('delta', {}).get('content', '')
-            response += chunk_message
-            st.markdown(chunk_message)
-    st.session_state.design_messages.append({"role": "assistant", "content": response})
+        response = st.write_stream(stream)
+    st.session_state.messages.append({"role": "assistant", "content": response})
