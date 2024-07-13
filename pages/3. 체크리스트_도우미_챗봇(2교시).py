@@ -80,15 +80,20 @@ if prompt := st.chat_input("What is up?"):
     with st.chat_message("user"):
         st.markdown(prompt)
 
+
     # OpenAI 모델 호출
     with st.chat_message("assistant"):
-        stream = client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": m["role"], "content": m["content"]}
-                    for m in st.session_state.messages
-                ],
-                stream=True,
-            )
-            response = st.write_stream(stream)
-        st.session_state.messages.append({"role": "assistant", "content": response})
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": m["role"], "content": m["content"]}
+                for m in st.session_state.messages
+            ],
+            stream=True,
+        )
+        
+        for chunk in response:
+            chunk_message = chunk['choices'][0].get('delta', {}).get('content', '')
+            if chunk_message:
+                st.markdown(chunk_message)
+                st.session_state.messages.append({"role": "assistant", "content": chunk_message})
