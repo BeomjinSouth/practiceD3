@@ -73,37 +73,7 @@ if prompt := st.chat_input("안녕하세요?"):
         )
         response = st.write_stream(stream)
     st.session_state.messages.append({"role": "assistant", "content": response})
-   
 
-# 챗봇 설정 메시지
-system_message = '''
-'''
-
-# 시스템 메시지 초기화
-if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "system", "content": system_message}]
-
-# 챗 메시지 출력
-for idx, message in enumerate(st.session_state.messages):
-    if idx > 0:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
-
-# 사용자 입력 받기
-if prompt := st.chat_input("What is up?"):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
-
-    # OpenAI 모델 호출
-    if "api_key" in st.session_state:
-        with st.chat_message("assistant"):
-            stream = client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": m["role"], "content": m["content"]}
-                    for m in st.session_state.messages
-                ],
                 stream=True,
             )
             response = st.write_stream(stream)
