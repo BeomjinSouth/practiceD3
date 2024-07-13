@@ -2,18 +2,10 @@ import streamlit as st
 from openai import OpenAI
 
 # 페이지 제목 설정
-st.title("친근한 챗봇")
+st.title("체크리스트 도우미 챗봇")
 
-# 사용자로부터 API 키 입력 받기
-api_key = st.text_input("API 키를 입력하세요:", type="password")
-
-# 입력된 API 키를 세션 상태에 저장
-if api_key:
-    st.session_state["api_key"] = api_key
-
-# API 클라이언트 초기화
-if "api_key" in st.session_state:
-    client = OpenAI(api_key=st.session_state["api_key"])
+# OpenAI API 키 설정
+client = OpenAI(api_key=st.secrets["OPENAI"]["OPENAI_API_KEY"])
 
 # 챗봇 설정 메시지
 system_message = '''
