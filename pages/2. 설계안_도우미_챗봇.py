@@ -45,7 +45,6 @@ system_message = '''
 ### 어투
 - 예의를 갖추어 대답할 것 
 '''
-
 # 시스템 메시지 초기화
 if "design_messages" not in st.session_state:
     st.session_state.design_messages = []
@@ -73,4 +72,4 @@ if prompt := st.chat_input("안녕하세요?"):
             stream=True,
         )
         response = st.write_stream(stream)
-    st.session_state.messages.append({"role": "assistant", "content": response})
+    st.session_state.design_messages.append({"role": "assistant", "content": response})
