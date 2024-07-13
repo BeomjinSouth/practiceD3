@@ -4,6 +4,7 @@ from openai import OpenAI
 # OpenAI API 키 설정
 client = OpenAI(api_key=st.secrets["OPENAI"]["OPENAI_API_KEY"])
 
+st.title("체크리스트 도우미 챗봇")
 
 if "openai_model" not in st.session_state:
     st.session_state["openai_model"] = "gpt-4o"
