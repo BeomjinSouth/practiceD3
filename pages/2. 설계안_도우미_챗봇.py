@@ -46,19 +46,20 @@ system_message = '''
 - 예의를 갖추어 대답할 것 
 '''
 
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+# 시스템 메시지 초기화
+if "design_messages" not in st.session_state:
+    st.session_state.design_messages = []
 
-if len(st.session_state.messages) == 0:
-    st.session_state.messages = [{"role": "system", "content": system_message}]
+if len(st.session_state.design_messages) == 0:
+    st.session_state.design_messages = [{"role": "system", "content": system_message}]
 
-for idx, message in enumerate(st.session_state.messages):
+for idx, message in enumerate(st.session_state.design_messages):
     if idx > 0:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
 if prompt := st.chat_input("안녕하세요?"):
-    st.session_state.messages.append({"role": "user", "content": prompt})
+    st.session_state.design_messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
@@ -67,9 +68,13 @@ if prompt := st.chat_input("안녕하세요?"):
             model=st.session_state["openai_model"],
             messages=[
                 {"role": m["role"], "content": m["content"]}
-                for m in st.session_state.messages
+                for m in st.session_state.design_messages
             ],
             stream=True,
         )
-        response = st.write_stream(stream)
-    st.session_state.messages.append({"role": "assistant", "content": response})
+        response = ""
+        for chunk in stream:
+            chunk_message = chunk['choices'][0].get('delta', {}).get('content', '')
+            response += chunk_message
+            st.markdown(chunk_message)
+    st.session_state.design_messages.append({"role": "assistant", "content": response})
