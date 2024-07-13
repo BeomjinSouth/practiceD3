@@ -1,13 +1,14 @@
 import streamlit as st
 from openai import OpenAI
 
-# 페이지 제목 설정
-st.title("설계안 도우미 챗봇")
-
 # OpenAI API 키 설정
 client = OpenAI(api_key=st.secrets["OPENAI"]["OPENAI_API_KEY"])
 
-# 챗봇 설정 메시지
+st.title("설계안 도우미 챗봇")
+
+if "openai_model" not in st.session_state:
+    st.session_state["openai_model"] = "gpt-4o"
+
 system_message = '''
 # 체크리스트 검토
 
@@ -39,10 +40,43 @@ system_message = '''
 9. AI 튜터(질의응답) : AI에게 궁금한 내용을 질문하면 AI가 대답
 10. 모니터링 : 학생의 학습 과정을 실시간으로 확인하고 피드백 제공
 11. 콘텐츠 재구성 : 교사가 디지털 교과서의 콘텐츠를 변경, 재구성
-12. 팀빌딩 : 학생의 성취도에 따라 적절한 모둠을 구
+12. 팀빌딩 : 학생의 성취도에 따라 적절한 모둠을 구성
    
 ### 어투
 - 예의를 갖추어 대답할 것 
+'''
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+if len(st.session_state.messages) == 0:
+    st.session_state.messages = [{"role": "system", "content": system_message}]
+
+for idx, message in enumerate(st.session_state.messages):
+    if idx > 0:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+if prompt := st.chat_input("안녕하세요?"):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    with st.chat_message("assistant"):
+        stream = client.chat.completions.create(
+            model=st.session_state["openai_model"],
+            messages=[
+                {"role": m["role"], "content": m["content"]}
+                for m in st.session_state.messages
+            ],
+            stream=True,
+        )
+        response = st.write_stream(stream)
+    st.session_state.messages.append({"role": "assistant", "content": response})
+   
+
+# 챗봇 설정 메시지
+system_message = '''
 '''
 
 # 시스템 메시지 초기화
