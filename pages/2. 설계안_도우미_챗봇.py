@@ -73,8 +73,3 @@ if prompt := st.chat_input("안녕하세요?"):
         )
         response = st.write_stream(stream)
     st.session_state.messages.append({"role": "assistant", "content": response})
-
-                stream=True,
-            )
-            response = st.write_stream(stream)
-        st.session_state.messages.append({"role": "assistant", "content": response})
