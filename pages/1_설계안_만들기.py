@@ -52,17 +52,12 @@ with st.form("form"):
     
     st.text("수업에 꼭 넣고 싶은 것을 작성해주세요")
     must_include = st.text_area("꼭 넣고 싶은 것들")
-
-
       
     submit = st.form_submit_button("Submit")
 
-
-    
-
     if submit:
         with st.spinner("설계안을 생성 중입니다!"):
-        prompt = f"수업시간은 50분이야. 과목: {subjects}\n단원명: {units}\n수업주제: {topics}\n포함하고 싶은 AI 디지털 교과서 기능: {keyword_1}, {keyword_2}, {keyword_3}\n수업 상세 설명: {details}\n꼭 넣고 싶은 것들: {must_include}"
+            prompt = f"수업시간은 50분이야. 과목: {subjects}\n단원명: {units}\n수업주제: {topics}\n포함하고 싶은 AI 디지털 교과서 기능: {keyword_1}, {keyword_2}, {keyword_3}\n수업 상세 설명: {details}\n꼭 넣고 싶은 것들: {must_include}"
             response = request_chat_completion(
                 prompt=prompt,
                 stream=False
