@@ -46,15 +46,18 @@ with st.form("form"):
         keyword_2 = st.text_input("AIDT 기능 2")
     with col6:
         keyword_3 = st.text_input("AIDT 기능 3")
-    
-    submit = st.form_submit_button("Submit")
-
-    
+  
     st.text("수업에 대한 상세한 설명을 작성해주세요")
     details = st.text_area("수업 상세 설명")
     
     st.text("수업에 꼭 넣고 싶은 것을 작성해주세요")
     must_include = st.text_area("꼭 넣고 싶은 것들")
+
+
+      
+    submit = st.form_submit_button("Submit")
+
+
     
 
     if submit:
