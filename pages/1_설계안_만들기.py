@@ -22,7 +22,7 @@ def request_chat_completion(
     return response
 
 st.set_page_config(
-    page_title="GPT API를 활용한 챗봇",
+    page_title="GPT API를 활용한 챗봇 - 성호중 박범진",
     page_icon="🎇"
 )
 
