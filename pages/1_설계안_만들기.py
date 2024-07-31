@@ -28,39 +28,56 @@ st.set_page_config(
 
 st.title("GPT-4를 활용한 설계안 만들어보기")
 st.subheader("AI를 활용하여 설계안을 만들어봅시다")
+
+if "form_data" not in st.session_state:
+    st.session_state["form_data"] = {
+        "subjects": "",
+        "units": "",
+        "topics": "",
+        "keyword_1": "",
+        "keyword_2": "",
+        "keyword_3": "",
+        "details": "",
+        "must_include": "",
+        "response": ""
+    }
+
 with st.form("form"):
     st.text("과목, 단원, 수업주제를 입력해주세요")
     col1, col2, col3 = st.columns(3)
     with col1:
-        subjects = st.text_input("과목")
+        st.session_state.form_data["subjects"] = st.text_input("과목", st.session_state.form_data["subjects"])
     with col2:
-        units = st.text_input("단원")
+        st.session_state.form_data["units"] = st.text_input("단원", st.session_state.form_data["units"])
     with col3:
-        topics = st.text_input("수업주제")
+        st.session_state.form_data["topics"] = st.text_input("수업주제", st.session_state.form_data["topics"])
     
     st.text("포함하고 싶은 AIDT의 기능을 최대 3개까지 입력해주세요")
     col4, col5, col6 = st.columns(3)
     with col4:
-        keyword_1 = st.text_input("AIDT 기능 1")
+        st.session_state.form_data["keyword_1"] = st.text_input("AIDT 기능 1", st.session_state.form_data["keyword_1"])
     with col5:
-        keyword_2 = st.text_input("AIDT 기능 2")
+        st.session_state.form_data["keyword_2"] = st.text_input("AIDT 기능 2", st.session_state.form_data["keyword_2"])
     with col6:
-        keyword_3 = st.text_input("AIDT 기능 3")
+        st.session_state.form_data["keyword_3"] = st.text_input("AIDT 기능 3", st.session_state.form_data["keyword_3"])
   
     st.text("수업에 대한 상세한 설명을 작성해주세요")
-    details = st.text_area("수업 상세 설명")
+    st.session_state.form_data["details"] = st.text_area("수업 상세 설명", st.session_state.form_data["details"])
     
     st.text("수업에 꼭 넣고 싶은 것을 작성해주세요")
-    must_include = st.text_area("꼭 넣고 싶은 것들")
+    st.session_state.form_data["must_include"] = st.text_area("꼭 넣고 싶은 것들", st.session_state.form_data["must_include"])
       
     submit = st.form_submit_button("Submit")
 
     if submit:
         with st.spinner("설계안을 생성 중입니다!"):
-            prompt = f"수업시간은 50분이야. 과목: {subjects}\n단원명: {units}\n수업주제: {topics}\n포함하고 싶은 AI 디지털 교과서 기능: {keyword_1}, {keyword_2}, {keyword_3}\n수업 상세 설명: {details}\n꼭 넣고 싶은 것들: {must_include}"
+            prompt = f"수업시간은 50분이야. 과목: {st.session_state.form_data['subjects']}\n단원명: {st.session_state.form_data['units']}\n수업주제: {st.session_state.form_data['topics']}\n포함하고 싶은 AI 디지털 교과서 기능: {st.session_state.form_data['keyword_1']}, {st.session_state.form_data['keyword_2']}, {st.session_state.form_data['keyword_3']}\n수업 상세 설명: {st.session_state.form_data['details']}\n꼭 넣고 싶은 것들: {st.session_state.form_data['must_include']}"
             response = request_chat_completion(
                 prompt=prompt,
                 stream=False
             )
-        st.success("제출 완료!")
-        st.write(response.choices[0].message.content)
+            st.session_state.form_data["response"] = response.choices[0].message.content
+
+if st.session_state.form_data["response"]:
+    st.success("제출 완료!")
+    st.write(st.session_state.form_data["response"])
