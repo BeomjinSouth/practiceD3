@@ -22,67 +22,67 @@ label {display: block; margin-bottom: 5px;} /* 라벨 스타일 조정 */
 .stSelectbox {margin-bottom: 20px;} /* 셀렉트박스 하단 여백 추가 */
 </style>
 """,
-unsafe_allow_html=True
+    unsafe_allow_html=True
 )
 
 def is_input_exist(text):
-pattern = re.compile(r'[a-zA-Z가-힣]')
-return not bool(pattern.search(text))
+    pattern = re.compile(r'[a-zA-Z가-힣]')
+    return not bool(pattern.search(text))
 
 def which_eng_kor(input_s):
-count = Counter(input_s)
-k_count = sum(count[c] for c in count if ord('가') <= ord(c) <= ord('힣'))
-e_count = sum(count[c] for c in count if 'a' <= c.lower() <= 'z')
-return "ko" if k_count > e_count else "en"
+    count = Counter(input_s)
+    k_count = sum(count[c] for c in count if ord('가') <= ord(c) <= ord('힣'))
+    e_count = sum(count[c] for c in count if 'a' <= c.lower() <= 'z')
+    return "ko" if k_count > e_count else "en"
 
 def extract_question(text):
-match = re.match(r'(\d{1,2}\s*\.?\s*번?)\s*(.*)', text)
-if match:
-    number = match.group(1).strip()
-    question = match.group(2).strip()
-    return number, question
-else:
-    return None, text.lstrip()
+    match = re.match(r'(\d{1,2}\s*\.?\s*번?)\s*(.*)', text)
+    if match:
+        number = match.group(1).strip()
+        question = match.group(2).strip()
+        return number, question
+    else:
+        return None, text.lstrip()
 
 def merge_lines(lines):
-merged = []
-current_sentence = ""
-for line in lines:
-    line = line.strip()
-    if line.endswith('.') or line.endswith('?') or line.endswith('!'):
-        current_sentence += " " + line
+    merged = []
+    current_sentence = ""
+    for line in lines:
+        line = line.strip()
+        if line.endswith('.') or line.endswith('?') or line.endswith('!'):
+            current_sentence += " " + line
+            merged.append(current_sentence.strip())
+            current_sentence = ""
+        else:
+            current_sentence += " " + line
+    if current_sentence:
         merged.append(current_sentence.strip())
-        current_sentence = ""
-    else:
-        current_sentence += " " + line
-if (current_sentence):
-    merged.append(current_sentence.strip())
-return merged
+    return merged
 
 def get_voice(option, idx, gender):
-if option in ["random", "sequential"]:
-    if gender == "female":
-        voices = ['alloy', 'fable', 'nova', 'shimmer']
+    if option in ["random", "sequential"]:
+        if gender == "female":
+            voices = ['alloy', 'fable', 'nova', 'shimmer']
+        else:
+            voices = ['echo', 'onyx']
+        if option == "random":
+            selected_voice = random.choice(voices)
+            print(f"Randomly selected {gender} voice: {selected_voice}")
+            return selected_voice
+        else:
+            selected_voice = voices[idx % len(voices)]
+            print(f"Sequentially selected {gender} voice: {selected_voice}")
+            return selected_voice
     else:
-        voices = ['echo', 'onyx']
-    if option == "random":
-        selected_voice = random.choice(voices)
-        print(f"Randomly selected {gender} voice: {selected_voice}")
-        return selected_voice
-    else:
-        selected_voice = voices[idx % len(voices)]
-        print(f"Sequentially selected {gender} voice: {selected_voice}")
-        return selected_voice
-else:
-    print(f"Selected {gender} voice: {option}")
-    return option
+        print(f"Selected {gender} voice: {option}")
+        return option
 
 api_key = st.secrets["OPENAI_API_KEY"]
 
 if not api_key:
-st.error("API key not found. Please set the OPENAI_API_KEY environment variable.")
+    st.error("API key not found. Please set the OPENAI_API_KEY environment variable.")
 else:
-client = OpenAI(api_key=api_key)
+    client = OpenAI(api_key=api_key)
 
 st.title("듣기평가 음원 만들기")
 st.markdown('제작 : 교사 박범진, <br>참고 소스코드 : 박현수 선생님', unsafe_allow_html=True)
@@ -124,4 +124,3 @@ st.text_area("대본 입력란", height=300, help="듣기평가 대본을 입력
 if st.button("🔊 음원 생성하기"):
     st.balloons()
     st.success("음원이 생성되었습니다.")
-
