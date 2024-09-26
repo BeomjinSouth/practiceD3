@@ -9,7 +9,7 @@ if 'knowledge_base' not in st.session_state:
 
 client = OpenAI(api_key=st.secrets["OPENAI"]["OPENAI_API_KEY"])
 
-st.title("설계안 도우미 챗봇 - 성호중 박범진")
+st.title("설계안 도우미 챗봇(미완성-작동안됨) - 성호중 박범진")
 
 # PDF 파일 업로드
 uploaded_file = st.file_uploader("PDF 파일을 업로드하세요", type=['pdf'])
