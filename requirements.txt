@@ -2,3 +2,12 @@ streamlit>=1.0
 openai>=0.10.0
 pdfplumber
 PyPDF2
+python-dotenv
+pydub
+numpy
+sympy
+matplotlib
+pdfplumber
+scipy
+scikit-learn
+pillow
