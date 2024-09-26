@@ -63,7 +63,7 @@ with st.form("form"):
 
     if submit:
         with st.spinner("설계안을 생성 중입니다!"):
-            prompt = f"수업시간은 45분이야. 과목: {st.session_state.form_data['subjects']}\n단원명: {st.session_state.form_data['units']}\n수업주제: {st.session_state.form_data['topics']}\n포함하고 싶은 AI 디지털 교과서 기능: {st.session_state.form_data['keyword_1']}, {st.session_state.form_data['keyword_2']}, {st.session_state.form_data['keyword_3']}\n수업 상세 설명: {st.session_state.form_data['details']}\n꼭 넣고 싶은 것들: {st.session_state.form_data['must_include']}"
+            prompt = f"수업시간은 45분이야. 과목: {st.session_state.form_data['subjects']}\n단원명: {st.session_state.form_data['units']}\n수업주제: {st.session_state.form_data['topics']}\n수업 상세 설명: {st.session_state.form_data['details']}\n꼭 넣고 싶은 것들: {st.session_state.form_data['must_include']}"
             response = request_chat_completion(
                 prompt=prompt,
                 stream=False
