@@ -9,19 +9,19 @@ from io import BytesIO
 
 # CSS 스타일 추가
 st.markdown(
-"""
-<style>
-p{font-size: 14px;text-align: left;}
-h1{font-size: 36px;}
-div.stButton > button, div.stDownloadButton > button {
-    height: 54px;
-    font-size: 24px;
-}
-.big-font {font-size: 22.5px; font-weight: bold;} /* 슬라이더와 셀렉트박스 라벨 크기 변경 */
-label {display: block; margin-bottom: 5px;} /* 라벨 스타일 조정 */
-.stSelectbox {margin-bottom: 20px;} /* 셀렉트박스 하단 여백 추가 */
-</style>
-""",
+    """
+    <style>
+    p{font-size: 14px;text-align: left;}
+    h1{font-size: 36px;}
+    div.stButton > button, div.stDownloadButton > button {
+        height: 54px;
+        font-size: 24px;
+    }
+    .big-font {font-size: 22.5px; font-weight: bold;} /* 슬라이더와 셀렉트박스 라벨 크기 변경 */
+    label {display: block; margin-bottom: 5px;} /* 라벨 스타일 조정 */
+    .stSelectbox {margin-bottom: 20px;} /* 셀렉트박스 하단 여백 추가 */
+    </style>
+    """,
     unsafe_allow_html=True
 )
 
@@ -77,10 +77,11 @@ def get_voice(option, idx, gender):
         print(f"Selected {gender} voice: {option}")
         return option
 
-api_key = st.secrets["OPENAI_API_KEY"]
+# 여기에서 수정된 부분입니다.
+api_key = st.secrets["OPENAI"]["OPENAI_API_KEY"]
 
 if not api_key:
-    st.error("API key not found. Please set the OPENAI_API_KEY environment variable.")
+    st.error("API key not found. Please set the OPENAI_API_KEY in your secrets.")
 else:
     client = OpenAI(api_key=api_key)
 
