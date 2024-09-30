@@ -37,7 +37,7 @@ if user_query:
         ]
         try:
             response = client.chat.completions.create(
-                model="gpt-4",  # 또는 사용 가능한 모델로 변경 필요
+                model="gpt-4o",  # 또는 사용 가능한 모델로 변경 필요
                 messages=messages,
                 temperature=0.7,
             )
