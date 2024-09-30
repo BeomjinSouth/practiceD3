@@ -8,9 +8,10 @@ client = OpenAI(api_key=st.secrets["OPENAI"]["OPENAI_API_KEY"])
 
 # Streamlit 앱 제목 및 안내 문구
 st.title("설계안 도우미 챗봇 - 성호중 박범진")
-st.write("PDF 를 업로드하고 질문을 작성한 뒤 엔터를 눌러주세요. 오른쪽 위 'Running'이 끝나면 답변이 출력됩니다.")
 st.markdown("<p style='font-size:20px;'>PDF 를 업로드하고 질문을 작성한 뒤 엔터를 눌러주세요.</p>", unsafe_allow_html=True)
 st.markdown("<p style='font-size:20px;'>오른쪽 위 'Running'이 끝나면 답변이 출력됩니다.</p>", unsafe_allow_html=True)
+st.markdown("<p style='font-size:20px;'>채팅시 밑에 새로 생기는 채팅 상자는 무시해주세요. 왜 그런지 모르겠습니다 ㅠㅠ</p>", unsafe_allow_html=True)
+
 
 # 세션 상태 초기화
 if 'knowledge_base' not in st.session_state:
