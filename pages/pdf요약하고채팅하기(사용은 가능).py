@@ -36,7 +36,7 @@ if st.button('대화 초기화'):
     st.write("대화가 초기화되었습니다.")
 
 # 사용자 질문 입력
-user_query = st.text_input("질문을 입력하세요:", key='user_query')
+user_query = st.text_input("질문을 입력하세요:")
 
 # 사용자 질문 처리
 if user_query:
@@ -61,10 +61,11 @@ if user_query:
         with st.spinner('GPT가 응답을 생성 중입니다...'):
             try:
                 response = client.chat.completions.create(
-                    model="gpt-4o",  # 또는 "gpt-4"를 사용하려면 해당 권한 필요
+                    model="gpt-3.5-turbo",  # 또는 "gpt-4"를 사용하려면 해당 권한 필요
                     messages=st.session_state['messages'],
                     temperature=0.7,
                 )
+                # response에서 content를 가져올 때 객체로 접근
                 answer = response.choices[0].message.content
 
                 # 어시스턴트 응답 추가
@@ -73,8 +74,8 @@ if user_query:
                 # 어시스턴트 응답 표시
                 st.write(f"**GPT의 답변:** {answer}")
 
-                # 입력창 초기화
-                st.session_state['user_query'] = ''
+                # 질문 입력 필드 초기화: 여기서 session_state를 수정하는 대신 빈 값으로 초기화
+                st.text_input("질문을 입력하세요:", value='', key="user_query", help="새로운 질문을 입력하세요.")
             except Exception as e:
                 st.error(f"에러가 발생했습니다: {e}")
 
