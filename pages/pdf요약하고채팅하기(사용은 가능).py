@@ -61,10 +61,9 @@ if user_query:
         # GPT-4 응답 생성 중 스피너 표시
         with st.spinner('GPT-4가 응답을 생성 중입니다...'):
             try:
-                response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",  # "gpt-4"를 사용하려면 해당 API 접근 권한이 필요합니다
-                    messages=st.session_state['messages'],
-                    max_tokens=1024,
+               response = client.chat.completions.create(
+                    model="gpt-4o",  # "gpt-4"를 사용하려면 해당 API 접근 권한이 필요합니다
+                    messages=messages,
                     temperature=0.7,
                 )
                 answer = response.choices[0].message.content
