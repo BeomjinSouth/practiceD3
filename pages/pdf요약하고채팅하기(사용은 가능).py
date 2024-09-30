@@ -1,15 +1,14 @@
 import streamlit as st
 import pdfplumber
 import io
-import os
-import openai
+from openai import OpenAI
 
-# OpenAI API 키 설정
-openai.api_key = st.secrets["OPENAI"]["OPENAI_API_KEY"]
+# OpenAI 클라이언트 생성 및 API 키 설정
+client = OpenAI(api_key=st.secrets["OPENAI"]["OPENAI_API_KEY"])
 
 # Streamlit 앱 제목 및 안내 문구
 st.title("설계안 도우미 챗봇 - 성호중 박범진")
-st.write("PDF 를 업로드하고 질문을 작성한 뒤 엔터를 눌러주세요. 오른쪽 위 Running이 끝나면 답변이 출력됩니다")
+st.write("PDF 를 업로드하고 질문을 작성한 뒤 엔터를 눌러주세요. 오른쪽 위 'Running'이 끝나면 답변이 출력됩니다.")
 
 # 세션 상태 초기화
 if 'knowledge_base' not in st.session_state:
@@ -56,23 +55,23 @@ if user_query:
             if message['role'] == 'user':
                 st.write(f"**사용자:** {message['content']}")
             elif message['role'] == 'assistant':
-                st.write(f"**GPT-4의 답변:** {message['content']}")
+                st.write(f"**GPT의 답변:** {message['content']}")
 
-        # GPT-4 응답 생성 중 스피너 표시
-        with st.spinner('GPT-4가 응답을 생성 중입니다...'):
+        # GPT 응답 생성 중 스피너 표시
+        with st.spinner('GPT가 응답을 생성 중입니다...'):
             try:
-               response = client.chat.completions.create(
-                    model="gpt-4o",  # "gpt-4"를 사용하려면 해당 API 접근 권한이 필요합니다
-                    messages=messages,
+                response = client.chat.completions.create(
+                    model="gpt-4o",  # 또는 "gpt-4"를 사용하려면 해당 권한 필요
+                    messages=st.session_state['messages'],
                     temperature=0.7,
                 )
-                answer = response.choices[0].message.content
+                answer = response.choices[0].message['content']
 
                 # 어시스턴트 응답 추가
                 st.session_state['messages'].append({"role": "assistant", "content": answer})
 
                 # 어시스턴트 응답 표시
-                st.write(f"**GPT-4의 답변:** {answer}")
+                st.write(f"**GPT의 답변:** {answer}")
 
                 # 입력창 초기화
                 st.session_state['user_query'] = ''
@@ -90,4 +89,4 @@ else:
             if message['role'] == 'user':
                 st.write(f"**사용자:** {message['content']}")
             elif message['role'] == 'assistant':
-                st.write(f"**GPT-4의 답변:** {message['content']}")
+                st.write(f"**GPT의 답변:** {message['content']}")
