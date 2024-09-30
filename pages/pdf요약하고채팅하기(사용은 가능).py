@@ -2,17 +2,21 @@ import streamlit as st
 import pdfplumber
 import io
 import os
-from openai import OpenAI
+import openai
 
-# 환경 변수에 API 키 설정
-os.environ['OPENAI_API_KEY'] = st.secrets["OPENAI"]["OPENAI_API_KEY"]
-client = OpenAI()
+# OpenAI API 키 설정
+openai.api_key = st.secrets["OPENAI"]["OPENAI_API_KEY"]
 
-# Streamlit 세션 상태 초기화
-if 'knowledge_base' not in st.session_state:
-    st.session_state.knowledge_base = ""
-
+# Streamlit 앱 제목 및 안내 문구
 st.title("설계안 도우미 챗봇 - 성호중 박범진")
+st.write("PDF 를 업로드하고 질문을 작성한 뒤 엔터를 눌러주세요. 오른쪽 위 Running이 끝나면 답변이 출력됩니다")
+
+# 세션 상태 초기화
+if 'knowledge_base' not in st.session_state:
+    st.session_state['knowledge_base'] = ""
+
+if 'messages' not in st.session_state:
+    st.session_state['messages'] = []
 
 # PDF 파일 업로드
 uploaded_file = st.file_uploader("PDF 파일을 업로드하세요", type=['pdf'])
@@ -24,26 +28,67 @@ if uploaded_file is not None:
             if page_text:
                 text += page_text + "\n\n"
 
-        st.session_state.knowledge_base = text
+        st.session_state['knowledge_base'] = text
         st.write("PDF에서 추출된 내용이 지식 베이스로 저장되었습니다.")
 
-# 사용자 질문 입력 및 처리
-user_query = st.text_input("질문을 입력하세요:")
+# 대화 초기화 버튼
+if st.button('대화 초기화'):
+    st.session_state['messages'] = []
+    st.write("대화가 초기화되었습니다.")
+
+# 사용자 질문 입력
+user_query = st.text_input("질문을 입력하세요:", key='user_query')
+
+# 사용자 질문 처리
 if user_query:
-    if st.session_state.knowledge_base:
-        messages = [
-            {"role": "system", "content": f"다음 문서 내용을 바탕으로 질문에 답해주세요:\n{st.session_state.knowledge_base}"},
-            {"role": "user", "content": user_query},
-        ]
-        try:
-            response = client.chat.completions.create(
-                model="gpt-4o",  # 또는 사용 가능한 모델로 변경 필요
-                messages=messages,
-                temperature=0.7,
+    # 지식 베이스가 존재하는지 확인
+    if st.session_state['knowledge_base']:
+        # 메시지 초기화 및 시스템 프롬프트 추가
+        if not st.session_state['messages']:
+            st.session_state['messages'].append(
+                {"role": "system", "content": f"다음 문서 내용을 바탕으로 질문에 답해주세요:\n{st.session_state['knowledge_base']}"}
             )
-            answer = response.choices[0].message.content
-            st.write("GPT-4의 답변:", answer)
-        except Exception as e:
-            st.error(f"에러가 발생했습니다: {e}")
+        # 사용자 메시지 추가
+        st.session_state['messages'].append({"role": "user", "content": user_query})
+
+        # 이전 대화 내용 표시
+        for message in st.session_state['messages']:
+            if message['role'] == 'user':
+                st.write(f"**사용자:** {message['content']}")
+            elif message['role'] == 'assistant':
+                st.write(f"**GPT-4의 답변:** {message['content']}")
+
+        # GPT-4 응답 생성 중 스피너 표시
+        with st.spinner('GPT-4가 응답을 생성 중입니다...'):
+            try:
+                response = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",  # "gpt-4"를 사용하려면 해당 API 접근 권한이 필요합니다
+                    messages=st.session_state['messages'],
+                    max_tokens=1024,
+                    temperature=0.7,
+                )
+                answer = response.choices[0].message.content
+
+                # 어시스턴트 응답 추가
+                st.session_state['messages'].append({"role": "assistant", "content": answer})
+
+                # 어시스턴트 응답 표시
+                st.write(f"**GPT-4의 답변:** {answer}")
+
+                # 입력창 초기화
+                st.session_state['user_query'] = ''
+            except Exception as e:
+                st.error(f"에러가 발생했습니다: {e}")
+
+        # 메시지 구분선 추가
+        st.markdown("---")
     else:
         st.warning("먼저 PDF 파일을 업로드하여 지식 베이스를 생성해주세요.")
+else:
+    # 이전 대화 내용 표시
+    if st.session_state['messages']:
+        for message in st.session_state['messages']:
+            if message['role'] == 'user':
+                st.write(f"**사용자:** {message['content']}")
+            elif message['role'] == 'assistant':
+                st.write(f"**GPT-4의 답변:** {message['content']}")
