@@ -61,7 +61,7 @@ if user_query:
         with st.spinner('GPT가 응답을 생성 중입니다...'):
             try:
                 response = client.chat.completions.create(
-                    model="gpt-3.5-turbo",  # 또는 "gpt-4"를 사용하려면 해당 권한 필요
+                    model="gpt-4o",  # 또는 "gpt-4"를 사용하려면 해당 권한 필요
                     messages=st.session_state['messages'],
                     temperature=0.7,
                 )
