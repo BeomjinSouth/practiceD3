@@ -65,7 +65,7 @@ if user_query:
                     messages=st.session_state['messages'],
                     temperature=0.7,
                 )
-                answer = response.choices[0].message['content']
+                answer = response.choices[0].message.content
 
                 # 어시스턴트 응답 추가
                 st.session_state['messages'].append({"role": "assistant", "content": answer})
