@@ -61,9 +61,7 @@ if st.button('생성'):
             model=MODEL,
             messages=[
                 {"role": "system", "content": "당신은 도움을 주는 어시스턴트입니다."},
-                {"role": "user", "content": [
-                    {"type": "text", "text": prompt}
-                ]}
+                {"role": "user", "content": [{"type": "text", "text": prompt}]}
             ]
         )
 
