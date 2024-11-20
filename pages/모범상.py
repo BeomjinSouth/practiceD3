@@ -6,7 +6,7 @@ import os
 client = OpenAI(api_key=st.secrets["OPENAI"]["OPENAI_API_KEY"])
 
 # 모델 이름 설정
-MODEL = "gpt-4o-mini"
+MODEL = "gpt-4o"
 
 # 세션 상태 초기화
 if 'student_entries' not in st.session_state:
@@ -25,7 +25,7 @@ def reset_entries():
 
 # UI 레이아웃
 st.title('학생 추천 상장 생성기')
-st.write('학생의 우수한 점을 기록하고 GPT-4o-mini 모델을 활용해 추천 이유를 자동 생성하세요.')
+st.write('학생의 우수한 점을 기록하고 GPT-4o 모델을 활용해 추천 이유를 자동 생성하세요.')
 
 # 각 학생 항목에 대한 입력 필드 생성
 for idx, entry in enumerate(st.session_state['student_entries']):
@@ -44,7 +44,7 @@ if st.button('생성'):
     for entry in st.session_state['student_entries']:
         prompt = (
             f"'{entry['award_name']}' 상을 받을 학생인 {entry['student_name']}의 우수한 점은 다음과 같습니다: {entry['student_quality']}. "
-            f"이러한 점을 바탕으로 추천 이유를 작성해 주세요."
+            f"이러한 점을 바탕으로 해당 중학생의 추천서를 작성해 주세요. 300~400자 내외로 작성하시오."
         )
 
         try:
