@@ -4,7 +4,7 @@ import os
 
 
 # OpenAI API 키 설정
-openai.api_key = st.secrets["OPENAI"]["OPENAI_API_KEY"]
+client = OpenAI(api_key=st.secrets["OPENAI"]["OPENAI_API_KEY"])
 
 def request_chat_completion(
     prompt,
