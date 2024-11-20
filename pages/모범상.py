@@ -48,7 +48,7 @@ if st.button('생성'):
         )
 
         try:
-            response = client.chatcompletions.create(
+            response = client.chat.completions.create(
                 model=MODEL,
                 messages=[
                     {"role": "system", "content": "당신은 도움이 되는 조수입니다."},
