@@ -4,7 +4,7 @@ import os
 
 # Set up OpenAI configuration
 MODEL = "gpt-4o"
-client = OpenAI(api_key=st.secrets.get("OPENAI_API_KEY"))
+client = OpenAI(api_key=st.secrets["OPENAI"]["OPENAI_API_KEY"])
 
 # Initialize a list to store information about students
 if 'student_entries' not in st.session_state:
