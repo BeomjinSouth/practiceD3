@@ -55,7 +55,8 @@ if st.button('생성'):
                     {"role": "user", "content": prompt}
                 ]
             )
-            recommendation = response.choices[0].message['content'].strip()
+            # 수정된 응답 처리
+            recommendation = response.choices[0].message.content.strip()
         except Exception as e:
             recommendation = f"오류 발생: {str(e)}"
 
