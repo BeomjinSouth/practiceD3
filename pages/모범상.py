@@ -2,91 +2,82 @@ import streamlit as st
 from openai import OpenAI
 import os
 
+
 # OpenAI API 키 설정
-client = OpenAI(api_key=st.secrets["OPENAI"]["OPENAI_API_KEY"])
+openai.api_key = st.secrets["OPENAI"]["OPENAI_API_KEY"]
 
-# 모델 이름 설정
-MODEL = "gpt-4o-mini"
+def request_chat_completion(
+    prompt,
+    system_role="""당신은 교수학습 설계에 능숙한 베테랑 교사입니다. 언급된 내용을 참고하여 해당 교과의 수업 설계안을 작성합니다. 수업 설계안을 작성할 때에는 도입, 전개, 마무리로 구분하여 작성하세요.
+""",
+    model="gpt-4",
+    stream=False
+):
+    messages = [
+        {"role": "system", "content": system_role},
+        {"role": "user", "content": prompt},
+    ]
+    response = openai.ChatCompletion.create(
+        model=model,
+        messages=messages,
+        stream=stream
+    )
+    return response
 
-# 학생 정보 저장을 위한 리스트 초기화
-if 'student_entries' not in st.session_state:
-    st.session_state['student_entries'] = []
+st.set_page_config(
+    page_title="GPT API를 활용한 챗봇 - 성호중 박범진",
+    page_icon="🎇"
+)
 
-# 추천 이유 저장을 위한 리스트 초기화
-if 'recommendations' not in st.session_state:
-    st.session_state['recommendations'] = []
+st.title("GPT-4를 활용한 설계안 만들어보기")
+st.subheader("AI를 활용하여 설계안을 만들어봅시다")
 
-# 새로운 학생 항목 추가 함수
-def add_student_entry():
-    st.session_state['student_entries'].append({'award_name': '', 'student_name': '', 'student_quality': ''})
-
-# 입력 필드 초기화 함수
-def reset_entries():
-    st.session_state['student_entries'] = []
-    st.session_state['recommendations'] = []
-
-# UI 레이아웃 설정
-st.title('학생 추천 상장 생성기')
-st.write('학생의 우수한 점을 기록하고 GPT-4o-mini 모델을 활용해 추천 이유를 자동 생성하세요.')
-
-# 각 학생 항목에 대한 입력 필드 생성
-for idx, entry in enumerate(st.session_state['student_entries']):
-    award_name = st.text_input(f"상의 이름 (학생 {idx + 1})", key=f"award_name_{idx}", value=entry['award_name'])
-    student_name = st.text_input(f"학생 이름 (학생 {idx + 1})", key=f"student_name_{idx}", value=entry['student_name'])
-    student_quality = st.text_area(f"학생의 우수한 점 (학생 {idx + 1})", key=f"student_quality_{idx}", value=entry['student_quality'])
-    st.write("---")
-    # 입력된 값을 세션 상태에 저장
-    st.session_state['student_entries'][idx] = {
-        'award_name': award_name,
-        'student_name': student_name,
-        'student_quality': student_quality
+if "form_data" not in st.session_state:
+    st.session_state["form_data"] = {
+        "subjects": "",
+        "units": "",
+        "topics": "",
+        "keyword_1": "",
+        "keyword_2": "",
+        "keyword_3": "",
+        "details": "",
+        "must_include": "",
+        "response": ""
     }
 
-# 학생 추가 버튼
-if st.button('+ 학생 추가'):
-    add_student_entry()
+with st.form("form"):
+    st.text("과목, 단원, 수업주제를 입력해주세요")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.session_state.form_data["subjects"] = st.text_input("과목", st.session_state.form_data["subjects"])
+    with col2:
+        st.session_state.form_data["units"] = st.text_input("단원", st.session_state.form_data["units"])
+    with col3:
+        st.session_state.form_data["topics"] = st.text_input("수업주제", st.session_state.form_data["topics"])
 
-# 추천 이유 생성 버튼
-if st.button('생성'):
-    student_data = st.session_state['student_entries']
-    recommendations = []
+    st.text("수업에 대한 상세한 설명을 작성해주세요")
+    st.session_state.form_data["details"] = st.text_area("수업 상세 설명", st.session_state.form_data["details"])
 
-    for student in student_data:
-        prompt = (
-            f"당신은 도움이 되는 조수입니다. "
-            f"{student['student_name']} 학생이 '{student['award_name']}' 상을 받아야 하는 이유를 생성해 주세요. "
-            f"학생의 우수한 점은 다음과 같습니다: {student['student_quality']}"
-        )
+    st.text("수업에 꼭 넣고 싶은 것을 작성해주세요")
+    st.session_state.form_data["must_include"] = st.text_area("꼭 넣고 싶은 것들", st.session_state.form_data["must_include"])
 
-        try:
-            response = client.chat.completions.create(
-                model=MODEL,
-                messages=[
-                    {"role": "system", "content": "당신은 도움이 되는 조수입니다."},
-                    {"role": "user", "content": prompt}
-                ]
+    submit = st.form_submit_button("Submit")
+
+    if submit:
+        with st.spinner("설계안을 생성 중입니다!"):
+            prompt = f"""수업시간은 45분입니다.
+과목: {st.session_state.form_data['subjects']}
+단원명: {st.session_state.form_data['units']}
+수업주제: {st.session_state.form_data['topics']}
+수업 상세 설명: {st.session_state.form_data['details']}
+꼭 넣고 싶은 것들: {st.session_state.form_data['must_include']}"""
+            response = request_chat_completion(
+                prompt=prompt,
+                stream=False
             )
-            recommendation = response.choices[0].message.content.strip()
-        except Exception as e:
-            recommendation = f"추천 이유를 생성하는 중 오류 발생: {str(e)}"
+            st.session_state.form_data["response"] = response.choices[0].message.content
 
-        recommendations.append({
-            'student_name': student['student_name'],
-            'award_name': student['award_name'],
-            'recommendation': recommendation
-        })
+if st.session_state.form_data["response"]:
+    st.success("제출 완료!")
+    st.write(st.session_state.form_data["response"])
 
-    # 추천 이유를 세션 상태에 저장
-    st.session_state['recommendations'] = recommendations
-
-# 추천 이유 표시
-if st.session_state['recommendations']:
-    st.subheader('추천 이유')
-    for recommendation in st.session_state['recommendations']:
-        st.write(f"**{recommendation['student_name']}** 학생의 '{recommendation['award_name']}' 상 추천 이유:")
-        st.write(f"{recommendation['recommendation']}")
-        st.write("---")
-
-# 초기화 버튼
-if st.button('초기화'):
-    reset_entries()
