@@ -2,8 +2,6 @@ import streamlit as st
 from openai import OpenAI
 import os
 
-
-# OpenAI API 키 설정
 client = OpenAI(api_key=st.secrets["OPENAI"]["OPENAI_API_KEY"])
 
 def request_chat_completion(
@@ -80,4 +78,3 @@ with st.form("form"):
 if st.session_state.form_data["response"]:
     st.success("제출 완료!")
     st.write(st.session_state.form_data["response"])
-
