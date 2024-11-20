@@ -3,7 +3,7 @@ from openai import OpenAI
 import os
 
 # OpenAI API 키 설정
-api_key = st.secrets["OPENAI"]["OPENAI_API_KEY"]
+api_key = st.secrets["OPENAI_API_KEY"]
 client = OpenAI(api_key=api_key)
 
 # 모델 이름 설정
