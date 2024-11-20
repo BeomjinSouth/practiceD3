@@ -3,8 +3,8 @@ from openai import OpenAI
 import os
 
 # Set up OpenAI configuration
-MODEL = "gpt-4o"
-client = OpenAI(api_key=st.secrets["OPENAI"]["OPENAI_API_KEY"])
+MODEL = "gpt-4o-mini"
+openai.api_key = st.secrets["OPENAI"]["OPENAI_API_KEY"]
 
 # Initialize a list to store information about students
 if 'student_entries' not in st.session_state:
@@ -21,7 +21,7 @@ def reset_entries():
 
 # UI Layout
 st.title('학생 추천 상장 생성기')
-st.write('교사로서 학생의 우수한 점을 기록하고 GPT-4o 모델을 활용해 추천 이유를 자동 생성하세요.')
+st.write('교사로서 학생의 우수한 점을 기록하고 GPT-4o-mini 모델을 활용해 추천 이유를 자동 생성하세요.')
 
 # Loop through each student entry and create input fields
 for idx, entry in enumerate(st.session_state['student_entries']):
@@ -53,16 +53,17 @@ if st.button('생성'):
     recommendations = []
     for student in student_data:
         prompt = (
-            f"You are a helpful assistant generating award recommendations. "
-            f"Generate a reason why {student['student_name']} should receive the '{student['award_name']}' award. "
-            f"The student's qualities are: {student['student_quality']}"
+            f"학생 {student['student_name']}에게 '{student['award_name']}' 상을 수여해야 하는 이유를 작성해 주세요. "
+            f"이 학생의 우수한 점은 다음과 같습니다: {student['student_quality']}"
         )
 
-        response = client.chat.completions.create(
+        response = openai.ChatCompletion.create(
             model=MODEL,
             messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": prompt}
+                {"role": "system", "content": "당신은 도움을 주는 어시스턴트입니다."},
+                {"role": "user", "content": [
+                    {"type": "text", "text": prompt}
+                ]}
             ]
         )
 
