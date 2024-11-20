@@ -3,8 +3,7 @@ from openai import OpenAI
 import os
 
 # OpenAI API 키 설정
-api_key = st.secrets["OPENAI_API_KEY"]
-client = OpenAI(api_key=api_key)
+client = OpenAI(api_key=st.secrets["OPENAI"]["OPENAI_API_KEY"])
 
 # 모델 이름 설정
 MODEL = "gpt-4o-mini"
