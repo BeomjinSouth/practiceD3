@@ -1,6 +1,5 @@
 import streamlit as st
 from openai import OpenAI
-import os
 
 # OpenAI API 키 설정
 client = OpenAI(api_key=st.secrets["OPENAI"]["OPENAI_API_KEY"])
@@ -16,7 +15,7 @@ if 'recommendations' not in st.session_state:
 
 # 학생 항목 추가 함수
 def add_student_entry():
-    st.session_state['student_entries'].append({'award_name': '', 'student_name': '', 'student_quality': ''})
+    st.session_state['student_entries'].append({'student_name': '', 'award_name': '', 'student_quality': ''})
 
 # 세션 상태 초기화 함수
 def reset_entries():
@@ -27,12 +26,15 @@ def reset_entries():
 st.title('학생 추천 상장 생성기')
 st.write('학생의 우수한 점을 기록하고 GPT-4o 모델을 활용해 추천 이유를 자동 생성하세요.')
 
-# 각 학생 항목에 대한 입력 필드 생성
+# 각 학생 항목에 대한 입력 필드 생성 (한 행에 세 열로 배치)
 for idx, entry in enumerate(st.session_state['student_entries']):
-    entry['award_name'] = st.text_input(f"상의 이름 (학생 {idx + 1})", value=entry['award_name'], key=f"award_name_{idx}")
-    entry['student_name'] = st.text_input(f"학생 이름 (학생 {idx + 1})", value=entry['student_name'], key=f"student_name_{idx}")
-    entry['student_quality'] = st.text_area(f"학생의 우수한 점 (학생 {idx + 1})", value=entry['student_quality'], key=f"student_quality_{idx}")
-    st.write("---")
+    cols = st.columns(3)
+    with cols[0]:
+        entry['student_name'] = st.text_input(f"학생 이름 (학생 {idx + 1})", value=entry['student_name'], key=f"student_name_{idx}")
+    with cols[1]:
+        entry['award_name'] = st.text_input(f"상의 이름 (학생 {idx + 1})", value=entry['award_name'], key=f"award_name_{idx}")
+    with cols[2]:
+        entry['student_quality'] = st.text_input(f"학생의 우수한 점 (학생 {idx + 1})", value=entry['student_quality'], key=f"student_quality_{idx}")
 
 # 학생 추가 버튼
 if st.button('+ 학생 추가'):
@@ -55,7 +57,6 @@ if st.button('생성'):
                     {"role": "user", "content": prompt}
                 ]
             )
-            # 수정된 응답 처리
             recommendation = response.choices[0].message.content.strip()
         except Exception as e:
             recommendation = f"오류 발생: {str(e)}"
