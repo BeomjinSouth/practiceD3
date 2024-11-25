@@ -14,7 +14,7 @@ except ImportError:
     st.stop()
 
 # GitHub에 업로드한 폰트 경로
-uploaded_font_path = "practiceD3/fonts/Maplestory Light.ttf"  # GitHub에서 폰트가 위치한 상대 경로
+uploaded_font_path = "../fonts/Maplestory Light.ttf"  # GitHub에서 폰트가 위치한 상대 경로
 custom_font = font_manager.FontProperties(fname=uploaded_font_path)
 plt.rcParams["font.family"] = custom_font.get_name()  # matplotlib에 폰트 설정
 
