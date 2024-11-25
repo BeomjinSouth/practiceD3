@@ -13,4 +13,3 @@ scikit-learn
 pillow
 pandas
 openpyxl
-os
