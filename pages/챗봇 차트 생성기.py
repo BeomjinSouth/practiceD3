@@ -13,8 +13,8 @@ except ImportError:
     st.error("'openpyxl' 라이브러리가 설치되어 있지 않습니다. 터미널에서 'pip install openpyxl' 명령을 실행하여 설치해 주세요.")
     st.stop()
 
-# 폰트 설정
-uploaded_font_path = "/mnt/data/Maplestory Light.ttf"  # 첨부된 폰트 경로
+# GitHub에 업로드한 폰트 경로
+uploaded_font_path = "./fonts/Maplestory Light.ttf"  # GitHub에서 폰트가 위치한 상대 경로
 custom_font = font_manager.FontProperties(fname=uploaded_font_path)
 plt.rcParams["font.family"] = custom_font.get_name()  # matplotlib에 폰트 설정
 
