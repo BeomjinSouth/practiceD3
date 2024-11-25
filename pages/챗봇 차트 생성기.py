@@ -1,11 +1,11 @@
 import streamlit as st
-import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 from io import BytesIO
 import numpy as np
 from matplotlib import font_manager
-import os  # 이 줄을 추가하세요
+import os
+
 # 'openpyxl' 라이브러리 확인
 try:
     import openpyxl
@@ -13,23 +13,18 @@ except ImportError:
     st.error("'openpyxl' 라이브러리가 설치되어 있지 않습니다. 터미널에서 'pip install openpyxl' 명령을 실행하여 설치해 주세요.")
     st.stop()
 
-# 현재 작업 디렉토리 출력
-st.write(f"현재 작업 디렉토리: {os.getcwd()}")
-
-
-# GitHub에 업로드한 폰트 경로 (상대 경로 수정)
-uploaded_font_path = "../fonts/Maplestory Light.ttf"  # ../으로 상위 폴더로 이동
+# 현재 파일의 위치를 기준으로 폰트 경로 계산
+uploaded_font_path = "fonts/Maplestory Light.ttf"  # 현재 작업 디렉토리를 기준으로 설정
 
 # 폰트 경로 확인
+st.write(f"폰트 경로: {os.path.abspath(uploaded_font_path)}")  # 디버깅용
 if not os.path.exists(uploaded_font_path):
     st.error(f"폰트 파일을 찾을 수 없습니다: {uploaded_font_path}")
     st.stop()
 
-
 # matplotlib에 폰트 설정
 custom_font = font_manager.FontProperties(fname=uploaded_font_path)
 plt.rcParams["font.family"] = custom_font.get_name()
-
 
 # Streamlit 앱 설정
 st.set_page_config(
