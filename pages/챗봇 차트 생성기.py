@@ -1,4 +1,6 @@
 import streamlit as st
+from openai import OpenAI
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 from io import BytesIO
@@ -155,48 +157,77 @@ if generate_btn and data is not None and column is not None:
     if chart_type != "줄기와 잎 그림" and bin_width <= 0:
         st.error("계급 간격은 0보다 커야 합니다.")
     else:
-        with st.spinner("차트를 생성 중입니다..."):
+        with st.spinner("GPT-4o를 사용해 차트를 생성 중입니다..."):
+            # GPT에게 차트 생성 명령
+            if chart_type == "줄기와 잎 그림":
+                prompt = f"""
+                데이터: {data[column].dropna().tolist()}
+                차트 유형: {chart_type}
+                데이터 컬럼: {column}
+                줄기의 자릿수: {stem_unit}
+                적절한 코드로 줄기와 잎 그림을 생성하고, matplotlib를 사용하여 시각화하세요.
+                """
+            elif chart_type == "도수분포표":
+                prompt = f"""
+                데이터: {data[column].dropna().tolist()}
+                차트 유형: {chart_type}
+                데이터 컬럼: {column}
+                계급 간격: {bin_width}
+                계급 시작 값: {bin_start}
+                적절한 코드로 도수분포표를 생성하고, 표 형태로 출력하세요.
+                """
+            else:  # 히스토그램, 도수분포다각형
+                prompt = f"""
+                데이터: {data[column].dropna().tolist()}
+                차트 유형: {chart_type}
+                데이터 컬럼: {column}
+                계급 간격: {bin_width}
+                계급 시작 값: {bin_start}
+                X축 레이블: {x_label}
+                Y축 레이블: {y_label}
+                차트 제목: {chart_title}
+                차트 색상: {color}
+                선 스타일: {line_style}
+                적절한 matplotlib 코드로 차트를 생성하고 렌더링하세요.
+                """
+            response = client.completions.create(
+                engine="gpt-4o",
+                prompt=prompt,
+                max_tokens=1500,
+                temperature=0.7
+            )
+            code = response["choices"][0]["text"]
+            st.code(code, language="python")
+
+            # 실행 후 렌더링
             try:
-                if chart_type == "줄기와 잎 그림":
-                    # 줄기와 잎 그림 생성
-                    df = data[column].dropna()
-                    stems = (df // stem_unit).astype(int)
-                    leaves = (df % stem_unit).astype(int)
-                    stem_leaf = pd.DataFrame({'Stem': stems, 'Leaf': leaves})
-                    stem_leaf.sort_values(by=['Stem', 'Leaf'], inplace=True)
-                    grouped = stem_leaf.groupby('Stem')['Leaf'].apply(lambda x: ' '.join(x.astype(str))).reset_index()
-                    st.write("**줄기와 잎 그림**")
-                    st.table(grouped)
-                elif chart_type == "도수분포표":
-                    # 도수분포표 생성
-                    bins = np.arange(bin_start, data[column].max() + bin_width, bin_width)
-                    freq_table = pd.cut(data[column], bins=bins, right=False).value_counts().sort_index().reset_index()
-                    freq_table.columns = ['계급 구간', '빈도수']
-                    st.write("**도수분포표**")
-                    st.table(freq_table)
-                    # 도수분포표 다운로드 기능 추가
-                    csv = freq_table.to_csv(index=False)
-                    st.download_button(
-                        label="도수분포표 다운로드 (CSV)",
-                        data=csv,
-                        file_name="frequency_table.csv",
-                        mime="text/csv"
-                    )
-                else:
-                    # 히스토그램 또는 도수분포다각형 생성
-                    bins = np.arange(bin_start, data[column].max() + bin_width, bin_width)
-                    fig, ax = plt.subplots()
-                    counts, bins, patches = ax.hist(data[column], bins=bins, color=color, edgecolor='black')
-                    if chart_type == "도수분포다각형":
-                        bin_centers = 0.5 * (bins[:-1] + bins[1:])
-                        ax.plot(bin_centers, counts, linestyle=line_style, color=color)
-                    ax.set_xlabel(x_label)
-                    ax.set_ylabel(y_label)
-                    ax.set_title(chart_title)
-                    st.pyplot(fig)
-                    # 차트 다운로드
+                # 필요한 라이브러리를 위한 공간
+                local_vars = {
+                    "data": data,
+                    "plt": plt,
+                    "pd": pd,
+                    "np": np,
+                    "st": st,
+                    "column": column,
+                    "stem_unit": stem_unit if 'stem_unit' in locals() else None,
+                    "bin_width": bin_width if 'bin_width' in locals() else None,
+                    "bin_start": bin_start if 'bin_start' in locals() else None,
+                    "x_label": x_label if 'x_label' in locals() else '',
+                    "y_label": y_label if 'y_label' in locals() else '',
+                    "chart_title": chart_title if 'chart_title' in locals() else '',
+                    "color": color if 'color' in locals() else '',
+                    "line_style": line_style if 'line_style' in locals() else ''
+                }
+                exec(code, globals(), local_vars)
+
+                # 차트가 생성되었는지 확인
+                fig = local_vars.get('fig', None)
+                if fig is not None:
                     buf = BytesIO()
                     fig.savefig(buf, format="png")
+                    buf.seek(0)
+                    st.image(buf)
+                    # 차트 다운로드
                     buf.seek(0)
                     st.download_button(
                         label="차트 다운로드",
@@ -205,6 +236,24 @@ if generate_btn and data is not None and column is not None:
                         mime="image/png"
                     )
                     buf.close()
+                    plt.close(fig)
+                elif chart_type == "도수분포표":
+                    freq_table = local_vars.get('freq_table', None)
+                    if freq_table is not None:
+                        st.write("**도수분포표**")
+                        st.table(freq_table)
+                        # 도수분포표 다운로드 기능 추가
+                        csv = freq_table.to_csv(index=False)
+                        st.download_button(
+                            label="도수분포표 다운로드 (CSV)",
+                            data=csv,
+                            file_name="frequency_table.csv",
+                            mime="text/csv"
+                        )
+                    else:
+                        st.error("도수분포표를 생성하는 데 실패했습니다.")
+                else:
+                    st.error("차트를 생성하는 데 오류가 발생했습니다.")
             except Exception as e:
                 st.error(f"차트를 생성하는 데 오류가 발생했습니다: {e}")
 else:
