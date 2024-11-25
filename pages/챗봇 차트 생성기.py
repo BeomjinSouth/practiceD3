@@ -251,6 +251,9 @@ if hint_btn and data is not None and column is not None:
         st.markdown("### 📝 힌트")
         st.write(f"{chart_type}을 분석할 때 데이터의 중앙값이나 분산을 고려해 보세요.")
 
+# 현재 작업 디렉토리 출력
+st.write(f"현재 작업 디렉토리: {os.getcwd()}")
+
 # CSS 스타일 적용
 st.markdown(
     """
