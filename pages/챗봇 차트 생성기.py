@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from io import BytesIO
 import numpy as np
 from matplotlib import font_manager
-
+import os  # 이 줄을 추가하세요
 # 'openpyxl' 라이브러리 확인
 try:
     import openpyxl
