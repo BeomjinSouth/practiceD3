@@ -11,3 +11,5 @@ pdfplumber
 scipy
 scikit-learn
 pillow
+pandas
+openpyxl
