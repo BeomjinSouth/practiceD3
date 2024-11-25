@@ -1,16 +1,21 @@
 import streamlit as st
+import subprocess
 import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 from io import BytesIO
 import numpy as np
 
-# 'openpyxl' 라이브러리 확인
+# 필요한 라이브러리 설치 함수
+def install(package):
+    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+
+# 'openpyxl' 라이브러리 설치
 try:
     import openpyxl
 except ImportError:
-    st.error("'openpyxl' 라이브러리가 설치되어 있지 않습니다. 터미널에서 'pip install openpyxl' 명령을 실행하여 설치해 주세요.")
-    sys.exit(1)
+    install('openpyxl')
+    import openpyxl
 
 # Streamlit 앱 설정
 st.set_page_config(
@@ -208,4 +213,43 @@ if generate_btn and data is not None and column is not None:
                         label="차트 다운로드",
                         data=buf,
                         file_name="chart.png",
+                        mime="image/png"
                     )
+                    buf.close()
+                    plt.close(fig)
+            except Exception as e:
+                st.error(f"차트를 생성하는 데 오류가 발생했습니다: {e}")
+else:
+    if data is None:
+        st.info("CSV 또는 Excel 파일을 업로드하세요.")
+    elif column is None:
+        st.info("적절한 데이터 컬럼을 선택하세요.")
+    else:
+        st.info("필요한 옵션을 선택하고 '차트 생성'을 클릭하세요.")
+
+# 개선 사항 제안 버튼 기능
+if suggest_btn and data is not None and column is not None:
+    with st.spinner("개선 사항을 생성 중입니다..."):
+        # 개선 사항 생성 (여기서는 예시로 고정된 메시지를 출력)
+        st.markdown("### 💡 개선 사항 제안")
+        st.write("데이터의 분포를 더 잘 이해하기 위해 다른 차트 유형을 시도해 보세요. 또는 데이터의 이상치를 확인하고 제거해 볼 수 있습니다.")
+
+# 힌트 제공 버튼 기능
+if hint_btn and data is not None and column is not None:
+    with st.spinner("힌트를 생성 중입니다..."):
+        # 힌트 제공 (여기서는 예시로 고정된 메시지를 출력)
+        st.markdown("### 📝 힌트")
+        st.write(f"{chart_type}을 분석할 때 데이터의 중앙값이나 분산을 고려해 보세요.")
+
+# CSS 스타일 적용
+st.markdown(
+    """
+    <style>
+    .stButton>button {
+        height: 3em;
+        width: 100%;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
