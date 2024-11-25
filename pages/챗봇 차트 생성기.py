@@ -208,4 +208,4 @@ if generate_btn and data is not None and column is not None:
                         label="차트 다운로드",
                         data=buf,
                         file_name="chart.png",
-                     
+                    )
