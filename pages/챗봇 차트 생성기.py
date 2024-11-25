@@ -13,10 +13,19 @@ except ImportError:
     st.error("'openpyxl' 라이브러리가 설치되어 있지 않습니다. 터미널에서 'pip install openpyxl' 명령을 실행하여 설치해 주세요.")
     st.stop()
 
-# GitHub에 업로드한 폰트 경로
-uploaded_font_path = "../fonts/Maplestory Light.ttf"  # GitHub에서 폰트가 위치한 상대 경로
+# GitHub에 업로드한 폰트 경로 (상대 경로 수정)
+uploaded_font_path = "../fonts/Maplestory Light.ttf"  # ../으로 상위 폴더로 이동
+
+# 폰트 경로 확인
+if not os.path.exists(uploaded_font_path):
+    st.error(f"폰트 파일을 찾을 수 없습니다: {uploaded_font_path}")
+    st.stop()
+
+
+# matplotlib에 폰트 설정
 custom_font = font_manager.FontProperties(fname=uploaded_font_path)
-plt.rcParams["font.family"] = custom_font.get_name()  # matplotlib에 폰트 설정
+plt.rcParams["font.family"] = custom_font.get_name()
+
 
 # Streamlit 앱 설정
 st.set_page_config(
