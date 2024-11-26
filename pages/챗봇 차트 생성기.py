@@ -6,6 +6,14 @@ import numpy as np
 from matplotlib import font_manager
 import os
 
+# 페이지 설정은 반드시 최상단에서 실행
+st.set_page_config(
+    page_title="데이터 차트 생성기",
+    page_icon="📊",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
 # 'openpyxl' 라이브러리 확인
 try:
     import openpyxl
@@ -17,7 +25,6 @@ except ImportError:
 uploaded_font_path = "fonts/Maplestory Light.ttf"  # 현재 작업 디렉토리를 기준으로 설정
 
 # 폰트 경로 확인
-st.write(f"폰트 경로: {os.path.abspath(uploaded_font_path)}")  # 디버깅용
 if not os.path.exists(uploaded_font_path):
     st.error(f"폰트 파일을 찾을 수 없습니다: {uploaded_font_path}")
     st.stop()
@@ -25,14 +32,6 @@ if not os.path.exists(uploaded_font_path):
 # matplotlib에 폰트 설정
 custom_font = font_manager.FontProperties(fname=uploaded_font_path)
 plt.rcParams["font.family"] = custom_font.get_name()
-
-# Streamlit 앱 설정
-st.set_page_config(
-    page_title="데이터 차트 생성기",
-    page_icon="📊",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
 
 # 사용자 매뉴얼 섹션
 with st.expander("📖 사용자 매뉴얼"):
