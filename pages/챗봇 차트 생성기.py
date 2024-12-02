@@ -5,6 +5,7 @@ from io import BytesIO
 import numpy as np
 from matplotlib import font_manager
 import os
+import matplotlib
 
 # 페이지 설정은 반드시 최상단에서 실행
 st.set_page_config(
@@ -22,7 +23,7 @@ except ImportError:
     st.stop()
 
 # 현재 파일의 위치를 기준으로 폰트 경로 계산
-uploaded_font_path = "practiceD3/fonts/Maplestory Bold.ttf"  # 현재 작업 디렉토리를 기준으로 설정
+uploaded_font_path = "practiceD3/fonts/Maplestory Bold.ttf"  # 실제 폰트 파일 경로로 수정
 
 # 폰트 경로 확인
 if not os.path.exists(uploaded_font_path):
@@ -30,8 +31,11 @@ if not os.path.exists(uploaded_font_path):
     st.stop()
 
 # matplotlib에 폰트 설정
-custom_font = font_manager.FontProperties(fname=uploaded_font_path)
-plt.rcParams["font.family"] = custom_font.get_name()
+font_name = font_manager.FontProperties(fname=uploaded_font_path).get_name()
+plt.rc('font', family=font_name)
+
+# Matplotlib 캐시 삭제 (필요한 경우)
+matplotlib.font_manager._rebuild()
 
 # 사용자 매뉴얼 섹션
 with st.expander("📖 사용자 매뉴얼"):
@@ -249,7 +253,6 @@ if hint_btn and data is not None and column is not None:
         st.markdown("### 📝 힌트")
         st.write(f"{chart_type}을 분석할 때 데이터의 중앙값이나 분산을 고려해 보세요.")
 
-
 # CSS 스타일 적용
 st.markdown(
     """
@@ -258,6 +261,22 @@ st.markdown(
         height: 3em;
         width: 100%;
     }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# Streamlit 전체 폰트 적용 (선택 사항)
+st.markdown(
+    f"""
+    <style>
+    @font-face {{
+        font-family: 'Maplestory Bold';
+        src: url('file://{os.path.abspath(uploaded_font_path)}') format('truetype');
+    }}
+    html, body, [class*="css"]  {{
+        font-family: 'Maplestory Bold', sans-serif;
+    }}
     </style>
     """,
     unsafe_allow_html=True
