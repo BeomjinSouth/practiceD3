@@ -1,11 +1,11 @@
-# -*- coding:utf-8 -*-
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 from io import BytesIO
 import numpy as np
-import matplotlib.font_manager as fm
 import os
+import matplotlib.font_manager as fm
+import urllib.request
 
 # 페이지 설정은 반드시 최상단에서 실행
 st.set_page_config(
@@ -23,30 +23,35 @@ except ImportError:
     st.stop()
 
 # 한글 폰트 적용 함수
-def unique(list):
-    x = np.array(list)
-    return np.unique(x)
+def load_korean_font():
+    font_url = "https://github.com/googlefonts/noto-cjk/raw/main/Sans/OTF/KR/NotoSansKR-Regular.otf"
+    font_path = "NotoSansKR-Regular.otf"
 
-@st.cache_data
-def fontRegistered():
-    font_dirs = [os.getcwd() + '/fonts']  # 폰트 폴더 경로 설정
-    font_files = fm.findSystemFonts(fontpaths=font_dirs)
-    for font_file in font_files:
-        fm.fontManager.addfont(font_file)
-    fm._load_fontmanager(try_read_cache=False)
+    if not os.path.exists(font_path):
+        # 폰트 파일 다운로드
+        urllib.request.urlretrieve(font_url, font_path)
 
-# 폰트 등록
-fontRegistered()
+    # 폰트 등록
+    fm.fontManager.addfont(font_path)
+    font_name = fm.FontProperties(fname=font_path).get_name()
+    plt.rc('font', family=font_name)
 
-# 사용 가능한 폰트 목록 가져오기
-fontNames = [f.name for f in fm.fontManager.ttflist]
-# 한글 폰트만 필터링
-korean_font_list = [font_name for font_name in fontNames if any('\uac00' <= c <= '\ud7a3' for c in font_name)]
-if korean_font_list:
-    fontname = korean_font_list[0]  # 첫 번째 한글 폰트 선택
-else:
-    fontname = 'sans-serif'  # 기본 폰트로 설정
-plt.rc('font', family=fontname)
+# 폰트 로드
+load_korean_font()
+
+# Streamlit에 폰트 적용
+st.markdown(
+    """
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap');
+
+    html, body, [class*="css"]  {
+        font-family: 'Noto Sans KR', sans-serif;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 # 사용자 매뉴얼 섹션
 with st.expander("📖 사용자 매뉴얼"):
@@ -76,13 +81,19 @@ uploaded_file = st.sidebar.file_uploader(
 # 데이터 읽기 및 표시
 if uploaded_file:
     try:
-        # 파일 형식에 따라 데이터 읽기
+        # 파일 확장자에 따라 처리
         if uploaded_file.name.endswith(".csv"):
             data = pd.read_csv(uploaded_file)
         elif uploaded_file.name.endswith(".xlsx"):
             data = pd.read_excel(uploaded_file, engine='openpyxl')
+        else:
+            st.error("지원하지 않는 파일 형식입니다. CSV 또는 Excel 파일을 업로드하세요.")
+            data = None
 
         st.sidebar.success("데이터가 성공적으로 업로드되었습니다.")
+    except UnicodeDecodeError:
+        st.sidebar.error("파일 인코딩 문제로 읽을 수 없습니다. 파일의 인코딩 방식을 확인하세요.")
+        data = None
     except Exception as e:
         st.sidebar.error(f"파일을 읽는 중 오류가 발생했습니다: {e}")
         data = None
@@ -90,7 +101,7 @@ else:
     data = None
 
 # 차트 선택
-chart_options = ["줄기와 잎 그림", "히스토그램", "도수분포표", "도수분포다각형"]
+chart_options = ["줄기와 잎 그림", "히스토그램", "도수분포표", "도수분포다각형", "히스토그램+도수분포다각형"]
 chart_type = st.sidebar.selectbox(
     "생성할 차트를 선택하세요:",
     chart_options,
@@ -134,7 +145,7 @@ if data is not None:
                 help="계급이 시작되는 값을 설정합니다."
             )
             # 히스토그램 및 도수분포다각형 추가 옵션
-            if chart_type in ["히스토그램", "도수분포다각형"]:
+            if chart_type in ["히스토그램", "도수분포다각형", "히스토그램+도수분포다각형"]:
                 x_label = st.sidebar.text_input(
                     "X축 레이블:",
                     value=column,
@@ -155,10 +166,27 @@ if data is not None:
                     value="#0000FF",
                     help="차트의 색상을 선택합니다."
                 )
+                line_color = st.sidebar.color_picker(
+                    "도수분포다각형 색상 선택:",
+                    value="#FF0000",
+                    help="도수분포다각형의 색상을 선택합니다."
+                )
                 line_style = st.sidebar.selectbox(
                     "선 스타일 선택:",
                     ["-", "--", "-.", ":"],
                     help="차트의 선 스타일을 선택합니다."
+                )
+            if chart_type == "도수분포표":
+                # 도수분포표 열 이름 설정
+                class_interval_label = st.sidebar.text_input(
+                    "계급 구간 열 이름:",
+                    value="계급 구간",
+                    help="계급 구간 열의 제목을 입력합니다."
+                )
+                frequency_label = st.sidebar.text_input(
+                    "빈도수 열 이름:",
+                    value="빈도수",
+                    help="빈도수 열의 제목을 입력합니다."
                 )
 else:
     column = None
@@ -199,15 +227,16 @@ if generate_btn and data is not None and column is not None:
                     stem_leaf.sort_values(by=['줄기', '잎'], inplace=True)
                     grouped = stem_leaf.groupby('줄기')['잎'].apply(lambda x: ' '.join(x.astype(str))).reset_index()
                     st.write("**줄기와 잎 그림**")
-                    st.table(grouped)
+                    st.table(grouped.style.hide_index())  # 인덱스 숨기기
                 elif chart_type == "도수분포표":
                     # 도수분포표 생성
                     bins = np.arange(bin_start, data[column].max() + bin_width, bin_width)
                     labels = [f"{bins[i]} ~ {bins[i+1]}" for i in range(len(bins)-1)]
-                    freq_table = pd.cut(data[column], bins=bins, labels=labels, right=False).value_counts().sort_index().reset_index()
-                    freq_table.columns = ['계급 구간', '빈도수']
+                    freq_series = pd.cut(data[column], bins=bins, labels=labels, right=False)
+                    freq_table = freq_series.value_counts().sort_index().reset_index()
+                    freq_table.columns = [class_interval_label, frequency_label]
                     st.write("**도수분포표**")
-                    st.table(freq_table)
+                    st.table(freq_table.style.hide_index())  # 인덱스 숨기기
                     # 도수분포표 다운로드 기능 추가
                     csv = freq_table.to_csv(index=False)
                     st.download_button(
@@ -217,16 +246,24 @@ if generate_btn and data is not None and column is not None:
                         mime="text/csv"
                     )
                 else:
-                    # 히스토그램 또는 도수분포다각형 생성
+                    # 히스토그램, 도수분포다각형 또는 히스토그램+도수분포다각형 생성
                     bins = np.arange(bin_start, data[column].max() + bin_width, bin_width)
                     fig, ax = plt.subplots()
-                    counts, bins, patches = ax.hist(data[column], bins=bins, color=color, edgecolor='black')
-                    if chart_type == "도수분포다각형":
+                    if chart_type == "히스토그램":
+                        ax.hist(data[column], bins=bins, color=color, edgecolor='black')
+                    elif chart_type == "도수분포다각형":
+                        counts, bins = np.histogram(data[column], bins=bins)
                         bin_centers = 0.5 * (bins[:-1] + bins[1:])
-                        ax.plot(bin_centers, counts, linestyle=line_style, color=color)
+                        ax.plot(bin_centers, counts, linestyle=line_style, color=line_color)
+                    elif chart_type == "히스토그램+도수분포다각형":
+                        ax.hist(data[column], bins=bins, color=color, edgecolor='black', alpha=0.5)
+                        counts, bins = np.histogram(data[column], bins=bins)
+                        bin_centers = 0.5 * (bins[:-1] + bins[1:])
+                        ax.plot(bin_centers, counts, linestyle=line_style, color=line_color)
                     ax.set_xlabel(x_label)
                     ax.set_ylabel(y_label)
                     ax.set_title(chart_title)
+                    ax.yaxis.set_major_locator(plt.MaxNLocator(integer=True))  # y축을 정수로
                     st.pyplot(fig)
                     # 차트 다운로드
                     buf = BytesIO()
