@@ -6,16 +6,6 @@ import numpy as np
 from matplotlib import font_manager
 import os
 import matplotlib
-import subprocess
-import sys
-
-def install_font():
-    subprocess.run(['apt-get', 'update'])
-    subprocess.run(['apt-get', 'install', '-y', 'fonts-nanum'])
-    
-if 'linux' in sys.platform:
-    install_font()
-
 
 # 페이지 설정은 반드시 최상단에서 실행
 st.set_page_config(
@@ -33,21 +23,16 @@ except ImportError:
     st.stop()
 
 # 현재 파일의 위치를 기준으로 폰트 경로 계산
-uploaded_font_path = "fonts/Maplestory Bold.ttf" 
+uploaded_font_path = "practiceD3/fonts/Maplestory Bold.ttf"  # 실제 폰트 파일 경로로 수정
 
 # 폰트 경로 확인
 if not os.path.exists(uploaded_font_path):
     st.error(f"폰트 파일을 찾을 수 없습니다: {uploaded_font_path}")
     st.stop()
 
-try:
-    font_path = uploaded_font_path
-    font_manager.fontManager.addfont(font_path)
-    plt.rc('font', family='Maplestory Bold')
-except Exception as e:
-    st.error(f"폰트 설정 오류: {e}")
-    st.stop()
-
+# matplotlib에 폰트 설정
+font_name = font_manager.FontProperties(fname=uploaded_font_path).get_name()
+plt.rc('font', family=font_name)
 
 # Matplotlib 캐시 삭제 (필요한 경우)
 matplotlib.font_manager._rebuild()
