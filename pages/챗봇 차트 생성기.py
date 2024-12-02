@@ -6,6 +6,16 @@ import numpy as np
 from matplotlib import font_manager
 import os
 import matplotlib
+import subprocess
+import sys
+
+def install_font():
+    subprocess.run(['apt-get', 'update'])
+    subprocess.run(['apt-get', 'install', '-y', 'fonts-nanum'])
+    
+if 'linux' in sys.platform:
+    install_font()
+
 
 # 페이지 설정은 반드시 최상단에서 실행
 st.set_page_config(
