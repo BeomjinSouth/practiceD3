@@ -22,7 +22,7 @@ except ImportError:
     st.stop()
 
 # 현재 파일의 위치를 기준으로 폰트 경로 계산
-uploaded_font_path = "fonts/Maplestory Light.ttf"  # 현재 작업 디렉토리를 기준으로 설정
+uploaded_font_path = "practiceD3/fonts/Maplestory Bold.ttf"  # 현재 작업 디렉토리를 기준으로 설정
 
 # 폰트 경로 확인
 if not os.path.exists(uploaded_font_path):
