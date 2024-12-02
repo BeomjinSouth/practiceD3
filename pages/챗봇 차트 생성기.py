@@ -23,16 +23,21 @@ except ImportError:
     st.stop()
 
 # 현재 파일의 위치를 기준으로 폰트 경로 계산
-uploaded_font_path = "practiceD3/fonts/Maplestory Bold.ttf"  # 실제 폰트 파일 경로로 수정
+uploaded_font_path = "fonts/Maplestory Bold.ttf" 
 
 # 폰트 경로 확인
 if not os.path.exists(uploaded_font_path):
     st.error(f"폰트 파일을 찾을 수 없습니다: {uploaded_font_path}")
     st.stop()
 
-# matplotlib에 폰트 설정
-font_name = font_manager.FontProperties(fname=uploaded_font_path).get_name()
-plt.rc('font', family=font_name)
+try:
+    font_path = uploaded_font_path
+    font_manager.fontManager.addfont(font_path)
+    plt.rc('font', family='Maplestory Bold')
+except Exception as e:
+    st.error(f"폰트 설정 오류: {e}")
+    st.stop()
+
 
 # Matplotlib 캐시 삭제 (필요한 경우)
 matplotlib.font_manager._rebuild()
