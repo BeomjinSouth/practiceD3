@@ -1,11 +1,11 @@
+# -*- coding:utf-8 -*-
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 from io import BytesIO
 import numpy as np
-from matplotlib import font_manager
+import matplotlib.font_manager as fm
 import os
-import matplotlib
 
 # 페이지 설정은 반드시 최상단에서 실행
 st.set_page_config(
@@ -22,20 +22,31 @@ except ImportError:
     st.error("'openpyxl' 라이브러리가 설치되어 있지 않습니다. 터미널에서 'pip install openpyxl' 명령을 실행하여 설치해 주세요.")
     st.stop()
 
-# 현재 파일의 위치를 기준으로 폰트 경로 계산
-uploaded_font_path = "practiceD3/fonts/Maplestory Bold.ttf"  # 실제 폰트 파일 경로로 수정
+# 한글 폰트 적용 함수
+def unique(list):
+    x = np.array(list)
+    return np.unique(x)
 
-# 폰트 경로 확인
-if not os.path.exists(uploaded_font_path):
-    st.error(f"폰트 파일을 찾을 수 없습니다: {uploaded_font_path}")
-    st.stop()
+@st.cache_data
+def fontRegistered():
+    font_dirs = [os.getcwd() + '/fonts']  # 폰트 폴더 경로 설정
+    font_files = fm.findSystemFonts(fontpaths=font_dirs)
+    for font_file in font_files:
+        fm.fontManager.addfont(font_file)
+    fm._load_fontmanager(try_read_cache=False)
 
-# matplotlib에 폰트 설정
-font_name = font_manager.FontProperties(fname=uploaded_font_path).get_name()
-plt.rc('font', family=font_name)
+# 폰트 등록
+fontRegistered()
 
-# Matplotlib 캐시 삭제 (필요한 경우)
-matplotlib.font_manager._rebuild()
+# 사용 가능한 폰트 목록 가져오기
+fontNames = [f.name for f in fm.fontManager.ttflist]
+# 한글 폰트만 필터링
+korean_font_list = [font_name for font_name in fontNames if any('\uac00' <= c <= '\ud7a3' for c in font_name)]
+if korean_font_list:
+    fontname = korean_font_list[0]  # 첫 번째 한글 폰트 선택
+else:
+    fontname = 'sans-serif'  # 기본 폰트로 설정
+plt.rc('font', family=fontname)
 
 # 사용자 매뉴얼 섹션
 with st.expander("📖 사용자 매뉴얼"):
@@ -242,14 +253,12 @@ else:
 # 개선 사항 제안 버튼 기능
 if suggest_btn and data is not None and column is not None:
     with st.spinner("개선 사항을 생성 중입니다..."):
-        # 개선 사항 생성 (예시 메시지)
         st.markdown("### 💡 개선 사항 제안")
         st.write("데이터의 분포를 더 잘 이해하기 위해 다른 차트 유형을 시도해 보세요. 또는 데이터의 이상치를 확인하고 제거해 볼 수 있습니다.")
 
 # 힌트 제공 버튼 기능
 if hint_btn and data is not None and column is not None:
     with st.spinner("힌트를 생성 중입니다..."):
-        # 힌트 제공 (예시 메시지)
         st.markdown("### 📝 힌트")
         st.write(f"{chart_type}을 분석할 때 데이터의 중앙값이나 분산을 고려해 보세요.")
 
@@ -261,22 +270,6 @@ st.markdown(
         height: 3em;
         width: 100%;
     }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# Streamlit 전체 폰트 적용 (선택 사항)
-st.markdown(
-    f"""
-    <style>
-    @font-face {{
-        font-family: 'Maplestory Bold';
-        src: url('file://{os.path.abspath(uploaded_font_path)}') format('truetype');
-    }}
-    html, body, [class*="css"]  {{
-        font-family: 'Maplestory Bold', sans-serif;
-    }}
     </style>
     """,
     unsafe_allow_html=True
