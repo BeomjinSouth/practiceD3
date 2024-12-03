@@ -239,7 +239,7 @@ if generate_btn and data is not None and column is not None:
                     freq_table = freq_series.value_counts().sort_index().reset_index()
                     freq_table.columns = [class_interval_label, frequency_label]
                     st.write("**도수분포표**")
-                    st.table(df.assign(hack='').set_index('hack'))
+                    st.dataframe(df.style.hide(axis='index'))
                     # 도수분포표 다운로드 기능 추가
                     csv = freq_table.to_csv(index=False)
                     st.download_button(
