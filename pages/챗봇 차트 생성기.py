@@ -5,7 +5,6 @@ from io import BytesIO
 import numpy as np
 import os
 import matplotlib.font_manager as fm
-import urllib.request
 
 # 페이지 설정은 반드시 최상단에서 실행
 st.set_page_config(
@@ -22,29 +21,27 @@ except ImportError:
     st.error("'openpyxl' 라이브러리가 설치되어 있지 않습니다. 터미널에서 'pip install openpyxl' 명령을 실행하여 설치해 주세요.")
     st.stop()
 
-# 한글 폰트 적용 함수
-def load_korean_font():
-    font_url = "https://github.com/googlefonts/noto-cjk/raw/main/Sans/OTF/KR/NotoSansKR-Regular.otf"
-    font_path = "NotoSansKR-Regular.otf"
+# 현재 파일의 위치를 기준으로 폰트 경로 설정
+current_dir = os.path.dirname(os.path.abspath(__file__))
+font_path = os.path.join(current_dir, 'fonts', 'NotoSansKR-Regular.otf')
 
-    if not os.path.exists(font_path):
-        # 폰트 파일 다운로드
-        urllib.request.urlretrieve(font_url, font_path)
+if not os.path.exists(font_path):
+    st.error(f"폰트 파일을 찾을 수 없습니다: {font_path}")
+    st.stop()
 
-    # 폰트 등록
-    fm.fontManager.addfont(font_path)
-    font_name = fm.FontProperties(fname=font_path).get_name()
-    plt.rc('font', family=font_name)
-
-# 폰트 로드
-load_korean_font()
+# 폰트 등록
+fm.fontManager.addfont(font_path)
+font_name = fm.FontProperties(fname=font_path).get_name()
+plt.rc('font', family=font_name)
 
 # Streamlit에 폰트 적용
 st.markdown(
     """
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap');
-
+    @font-face {
+        font-family: 'Noto Sans KR';
+        src: url('fonts/NotoSansKR-Regular.otf') format('opentype');
+    }
     html, body, [class*="css"]  {
         font-family: 'Noto Sans KR', sans-serif;
     }
