@@ -4,12 +4,13 @@ pdfplumber
 PyPDF2
 python-dotenv
 pydub
-numpy
+numpy>=1.18.0
 sympy
-matplotlib
+matplotlib>=3.2.0
 pdfplumber
 scipy
 scikit-learn
 pillow
 pandas
 openpyxl
+pandas>=1.4.0
