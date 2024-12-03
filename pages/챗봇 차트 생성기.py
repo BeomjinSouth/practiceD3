@@ -230,7 +230,7 @@ if generate_btn and data is not None and column is not None:
                     stem_leaf.sort_values(by=['줄기', '잎'], inplace=True)
                     grouped = stem_leaf.groupby('줄기')['잎'].apply(lambda x: ' '.join(x.astype(str))).reset_index()
                     st.write("**줄기와 잎 그림**")
-                    st.dataframe(df.style.hide(axis='index'))
+                    st.dataframe(grouped.style.hide(axis='index'))
                 elif chart_type == "도수분포표":
                     # 도수분포표 생성
                     bins = np.arange(bin_start, data[column].max() + bin_width, bin_width)
@@ -239,7 +239,7 @@ if generate_btn and data is not None and column is not None:
                     freq_table = freq_series.value_counts().sort_index().reset_index()
                     freq_table.columns = [class_interval_label, frequency_label]
                     st.write("**도수분포표**")
-                    st.dataframe(df.style.hide(axis='index'))
+                    st.dataframe(freq_table.style.hide(axis='index'))
                     # 도수분포표 다운로드 기능 추가
                     csv = freq_table.to_csv(index=False)
                     st.download_button(
@@ -248,6 +248,7 @@ if generate_btn and data is not None and column is not None:
                         file_name="frequency_table.csv",
                         mime="text/csv"
                     )
+
                 else:
                     # 히스토그램, 도수분포다각형 또는 히스토그램+도수분포다각형 생성
                     bins = np.arange(bin_start, data[column].max() + bin_width, bin_width)
