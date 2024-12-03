@@ -23,7 +23,13 @@ except ImportError:
 
 # 현재 파일의 위치를 기준으로 폰트 경로 설정
 current_dir = os.path.dirname(os.path.abspath(__file__))
-font_path = os.path.join(current_dir, 'fonts', 'NotoSansKR-Regular.otf')
+# 폰트 파일이 'pages' 폴더의 상위 디렉토리의 'fonts' 폴더에 있는 경우
+font_path = os.path.join(current_dir, '..', 'fonts', 'Maplestory Bold.ttf')
+
+# 디버깅을 위한 경로 출력
+st.write(f"현재 작업 디렉토리: {os.getcwd()}")
+st.write(f"현재 파일 경로: {current_dir}")
+st.write(f"폰트 파일 경로: {font_path}")
 
 if not os.path.exists(font_path):
     st.error(f"폰트 파일을 찾을 수 없습니다: {font_path}")
@@ -36,15 +42,15 @@ plt.rc('font', family=font_name)
 
 # Streamlit에 폰트 적용
 st.markdown(
-    """
+    f"""
     <style>
-    @font-face {
-        font-family: 'Noto Sans KR';
-        src: url('fonts/NotoSansKR-Regular.otf') format('opentype');
-    }
-    html, body, [class*="css"]  {
-        font-family: 'Noto Sans KR', sans-serif;
-    }
+    @font-face {{
+        font-family: 'Maplestory Bold';
+        src: url('file://{font_path}') format('truetype');
+    }}
+    html, body, [class*="css"]  {{
+        font-family: 'Maplestory Bold', sans-serif;
+    }}
     </style>
     """,
     unsafe_allow_html=True
