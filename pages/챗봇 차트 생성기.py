@@ -230,7 +230,7 @@ if generate_btn and data is not None and column is not None:
                     stem_leaf.sort_values(by=['줄기', '잎'], inplace=True)
                     grouped = stem_leaf.groupby('줄기')['잎'].apply(lambda x: ' '.join(x.astype(str))).reset_index()
                     st.write("**줄기와 잎 그림**")
-                    st.table(df.assign(hack='').set_index('hack'))
+                    st.dataframe(df.style.hide(axis='index'))
                 elif chart_type == "도수분포표":
                     # 도수분포표 생성
                     bins = np.arange(bin_start, data[column].max() + bin_width, bin_width)
